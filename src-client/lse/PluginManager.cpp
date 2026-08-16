@@ -45,6 +45,16 @@ constexpr auto PluginManagerName = "lse-nodejs";
 
 #endif
 
+#ifdef LSE_BACKEND_KOTLIN
+
+// #include "legacy/main/KotlinHelper.h"
+// constexpr auto BaseLibFileName   = "BaseLib.kt";
+constexpr auto PluginManagerName = "lse-kotlin";
+
+#endif
+
+
+
 // Do not use legacy headers directly, otherwise there will be tons of errors.
 void BindAPIs(std::shared_ptr<ScriptEngine> const& engine);
 void LLSERemoveTimeTaskData(std::shared_ptr<ScriptEngine> const& engine);

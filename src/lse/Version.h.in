@@ -20,6 +20,8 @@ ${define LSE_VERSION_PRERELEASE}
 #define LSE_ENTRY_FILE_NAME "legacy-script-engine-nodejs.dll"
 #elif defined(LSE_BACKEND_PYTHON)
 #define LSE_ENTRY_FILE_NAME "legacy-script-engine-python.dll"
+#elif defined(LSE_BACKEND_KOTLIN)
+#define LSE_ENTRY_FILE_NAME "legacy-script-engine-kotlin.dll"
 #endif
 
 #define LSE_WORKSPACE_FOLDER R"(${LSE_WORKSPACE_FOLDER}\)"

@@ -154,7 +154,10 @@ void loadConfig(ll::mod::NativeMod const& self, Config& cfg) {
 }
 
 void loadDebugEngine(ll::mod::NativeMod const& self) {
-#ifndef LSE_BACKEND_NODEJS // NodeJs backend didn't enable debug engine now
+#ifdef LSE_BACKEND_KOTLIN
+    static_cast<void>(self);
+#endif
+#ifndef LSE_BACKEND_NODEJS // Node.js has no debug engine.
     auto scriptEngine = EngineManager::newEngine();
 
     script::EngineScope engineScope(scriptEngine.get());
@@ -168,6 +171,7 @@ void loadDebugEngine(ll::mod::NativeMod const& self) {
 
     BindAPIs(scriptEngine);
 
+#ifndef LSE_BACKEND_KOTLIN
     // Load BaseLib.
     auto baseLibPath    = self.getModDir() / "baselib" / BaseLibFileName;
     auto baseLibContent = ll::file_utils::readFile(baseLibPath);
@@ -175,6 +179,7 @@ void loadDebugEngine(ll::mod::NativeMod const& self) {
         throw std::runtime_error("Failed to read BaseLib at {0}"_tr(baseLibPath.string()));
     }
     scriptEngine->eval(baseLibContent.value());
+#endif
 
     DebugEngine = scriptEngine;
 #endif

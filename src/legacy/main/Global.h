@@ -86,6 +86,11 @@ inline constexpr std::string LLSE_BACKEND_TYPE = "NodeJs";
 #elif defined(LSE_BACKEND_PYTHON)
 // Python
 inline constexpr std::string LLSE_BACKEND_TYPE = "Python";
+
+#elif defined(LSE_BACKEND_KOTLIN)
+// Kotlin
+inline constexpr std::string LLSE_BACKEND_TYPE = "Kotlin";
+
 #endif
 
 // Debug engine information
@@ -97,6 +102,8 @@ inline constexpr std::string LLSE_DEBUG_CMD = "jsdebug";
 inline constexpr std::string LLSE_DEBUG_CMD = "luadebug";
 #elif defined(LSE_BACKEND_PYTHON)
 inline constexpr std::string LLSE_DEBUG_CMD = "pydebug";
+#elif defined(LSE_BACKEND_KOTLIN)
+inline constexpr std::string LLSE_DEBUG_CMD = "ktdebug";
 #endif
 
 inline constexpr wchar_t       LLSE_GLOBAL_DATA_NAME[]                 = L"LLSE_GLOBAL_DATA_SECTION";

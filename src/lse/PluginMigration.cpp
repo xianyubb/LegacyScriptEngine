@@ -12,7 +12,6 @@
 #include <nlohmann/json.hpp>
 #include <unordered_set>
 
-
 #if LSE_BACKEND_LUA
 
 constexpr auto PluginExtName = ".lua";
@@ -40,6 +39,12 @@ constexpr auto PluginExtName = ".llplugin";
 
 #endif
 
+#ifdef LSE_BACKEND_KOTLIN
+
+constexpr auto PluginExtName = ".kt";
+
+#endif
+
 using namespace ll::i18n_literals;
 
 namespace lse {
@@ -60,12 +65,10 @@ auto migratePlugin(PluginManager const& pluginManager, std::filesystem::path con
     auto const& pluginDir          = ll::mod::getModsRoot() / pluginFileBaseName;
 
     if (std::filesystem::exists(pluginDir / pluginFileName)) {
-        throw std::runtime_error(
-            "Failed to migrate legacy plugin at {0}: {1} already exists"_tr(
-                ll::string_utils::u8str2str(path.u8string()),
-                ll::string_utils::u8str2str(pluginDir.u8string())
-            )
-        );
+        throw std::runtime_error("Failed to migrate legacy plugin at {0}: {1} already exists"_tr(
+            ll::string_utils::u8str2str(path.u8string()),
+            ll::string_utils::u8str2str(pluginDir.u8string())
+        ));
     }
 #ifndef LSE_BACKEND_NODEJS
     if (!std::filesystem::exists(pluginDir)) {
@@ -80,13 +83,14 @@ auto migratePlugin(PluginManager const& pluginManager, std::filesystem::path con
     std::filesystem::rename(path, pluginDir / pluginFileName);
 
     ll::mod::Manifest manifest{
-        .entry        = ll::string_utils::u8str2str(pluginFileName.u8string()),
-        .name         = ll::string_utils::u8str2str(pluginFileBaseName.u8string()),
-        .type         = pluginType,
-        .dependencies = ll::SmallDenseSet<ll::mod::Dependency>{
-                                                               ll::mod::Dependency{
-                .name = self.getManifest().name,
-            }, },
+        .entry = ll::string_utils::u8str2str(pluginFileName.u8string()),
+        .name  = ll::string_utils::u8str2str(pluginFileBaseName.u8string()),
+        .type  = pluginType,
+        .dependencies =
+            ll::SmallDenseSet<ll::mod::Dependency>{
+                                                   ll::mod::Dependency{
+                    .name = self.getManifest().name,
+                }, },
     };
 #endif
 #ifdef LSE_BACKEND_NODEJS
@@ -96,13 +100,14 @@ auto migratePlugin(PluginManager const& pluginManager, std::filesystem::path con
         30000
     );
     ll::mod::Manifest manifest{
-        .entry        = NodeJsHelper::findEntryScript(ll::string_utils::u8str2str(path.u8string())),
-        .name         = ll::string_utils::u8str2str(pluginFileBaseName.u8string()),
-        .type         = pluginType,
-        .dependencies = ll::SmallDenseSet<ll::mod::Dependency>{
-                                                               ll::mod::Dependency{
-                .name = self.getManifest().name,
-            }, },
+        .entry = NodeJsHelper::findEntryScript(ll::string_utils::u8str2str(path.u8string())),
+        .name  = ll::string_utils::u8str2str(pluginFileBaseName.u8string()),
+        .type  = pluginType,
+        .dependencies =
+            ll::SmallDenseSet<ll::mod::Dependency>{
+                                                   ll::mod::Dependency{
+                    .name = self.getManifest().name,
+                }, },
     };
     std::filesystem::remove(path);
 #endif

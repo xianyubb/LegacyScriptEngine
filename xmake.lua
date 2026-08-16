@@ -1,5 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
+add_repositories("xianyubb-repo https://github.com/xianyubb/xmake-repo.git")
 add_repositories("levimc-repo " .. (get_config("levimc_repo") or "https://github.com/LiteLDev/xmake-repo.git"))
 
 if is_config("target_type", "server") then
@@ -41,6 +42,8 @@ elseif is_config("backend", "python") then
 elseif is_config("backend", "nodejs") then
     add_requires("mariadb-connector-c 3.4.8")
     add_requires("scriptx 2026.4.1", { configs = { backend = "V8" } })
+elseif is_config("backend", "kotlin") then
+    add_requires("mariadb-connector-c 3.4.8")
 end
 
 if not has_config("vs_runtime") then
@@ -66,7 +69,7 @@ option_end()
 
 option("backend")
     set_default("lua")
-    set_values("lua", "quickjs", "python", "nodejs")
+    set_values("lua", "quickjs", "python", "nodejs", "kotlin")
 
 target("LegacyScriptEngine")
     add_rules("@levibuildscript/linkrule")
@@ -97,13 +100,15 @@ target("LegacyScriptEngine")
         "lightwebsocketclient",
         "magic_enum",
         "nlohmann_json",
-        "scriptx",
         "simpleini",
         "sqlite3",
         "toml++",
         "mariadb-connector-c",
         "ctre"
     )
+    if not is_config("backend", "kotlin") then
+        add_packages("scriptx")
+    end
     set_kind("shared")
     set_languages("cxx20")
     set_symbols("debug")
@@ -224,4 +229,32 @@ target("LegacyScriptEngine")
             os.mkdir(outputPath)
             os.cp(langPath, outputPath)
         end)
-    end
+    elseif is_config("backend", "kotlin") then
+        add_defines(
+            "LSE_BACKEND_KOTLIN",
+            "SCRIPTX_BACKEND=Kotlin",
+            "SCRIPTX_BACKEND_TRAIT_PREFIX=../backend/Kotlin/trait/Trait"
+        )
+        add_includedirs("../ScriptX/src/include")
+        add_linkdirs("../ScriptX/build/windows/x64/release")
+        add_links("ScriptX")
+        local javaHome = os.getenv("JAVA_HOME")
+        if not javaHome then
+            raise("Kotlin backend requires JAVA_HOME so jvm.lib can be linked")
+        end
+        if is_plat("windows") then
+            add_linkdirs(path.join(javaHome, "lib"))
+        elseif is_plat("linux") or is_plat("macosx") then
+            add_linkdirs(path.join(javaHome, "lib", "server"))
+        end
+        add_links("jvm")
+        remove_files("src/legacy/main/NodeJsHelper.cpp")
+        remove_files("src/legacy/main/PythonHelper.cpp")
+        set_basename("legacy-script-engine-kotlin")
+        after_build(function(target)
+            local langPath = path.join(os.projectdir(), "src/lang/")
+            local outputPath = path.join(os.projectdir(), "bin/" .. target:basename())
+            os.mkdir(outputPath)
+            os.cp(langPath, outputPath)
+        end)
+       end
